@@ -1,0 +1,32 @@
+---
+-
+  become: true
+  hosts: master01
+  become_method: sudo
+  become_user: root
+  tasks:
+  - name: Install haproxy
+    apt:
+      name:
+      - haproxy
+
+  - name: Change /etc/haproxy/haproxy.cfg
+    ansible.builtin.blockinfile:
+      path: /etc/haproxy/haproxy.cfg
+      block: |
+        frontend myfrontend
+        bind {{ansible_host}}:8080,:8443
+        default_backend myservers
+        use_backend special if { dst_port 8443 }
+        backend myservers
+        server server1 {{ hostvars['master01'].ansible_host }}:80
+        server server2 {{ hostvars['worknode01'].ansible_host }}:80
+        server server3 {{ hostvars['worknode02'].ansible_host }}:80
+        backend special
+        server server3 {{ hostvars['worknode02'].ansible_host }}:80
+
+  - name: Restart haproxy
+    service:
+      name: "haproxy"
+      state: "restarted"
+      enabled: "yes"

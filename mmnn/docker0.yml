@@ -1,0 +1,46 @@
+---
+-
+  become: true
+  hosts: all
+  become_method: sudo
+  become_user: root
+  tasks:
+  - name: Changes /etc/modules-load.d/modules.conf
+    ansible.builtin.lineinfile:
+      path: /etc/modules-load.d/modules.conf
+      line: br_netfilter \noverlay
+      create: yes
+
+  - name: Creating /etc/sysctl.d/kube.conf
+    ansible.builtin.lineinfile:
+      path: /etc/sysctl.d/kube.conf
+      line: net.bridge.bridge-nf-call-iptables = 1
+      create: yes
+    
+  - name: Install Docker
+    apt:
+      name:
+        - docker
+        - docker.io
+
+  - name: Creating /etc/docker/daemon.json
+    copy:
+      dest: "/etc/docker/daemon.json"
+      content: |
+        {
+        "exec-opts": ["native.cgroupdriver=systemd"],
+        "log-driver": "json-file",
+        "log-opts": {
+        "max-size": "100m"
+        },
+        "storage-driver": "overlay2",
+        "storage-opts": [
+        "overlay2.override_kernel_check=true"
+        ]
+        }
+
+  - name: Restart Docker
+    service:
+      name: "docker"
+      state: "restarted"
+      enabled: "yes"

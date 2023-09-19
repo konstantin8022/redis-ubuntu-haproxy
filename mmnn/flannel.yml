@@ -1,0 +1,22 @@
+---
+-
+  become: true
+  hosts: master01
+  become_method: sudo
+  become_user: root
+  tasks:
+  - name: Export KUBECONFIG
+    shell: export KUBECONFIG=/etc/kubernetes/admin.conf
+
+  - name: Export KUBECONFIG config
+    ansible.builtin.lineinfile:
+      path: /etc/environment
+      line: export KUBECONFIG=/etc/kubernetes/admin.conf
+      create: yes
+
+  - name: Apply flannel
+    shell: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+
+  - name: Waiting for 1 minutes until the pods start
+    pause:
+      minutes: 1
