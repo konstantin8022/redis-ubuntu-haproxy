@@ -1,0 +1,12 @@
+#!/bin/bash
+host1="master01"
+host2="master02"
+host3="master03"
+#addr1=192.168.1.245
+#addr2=192.168.1.247
+#addr3=192.168.1.249
+
+
+#host1="worknode01"
+#host2="worknode02"
+#host3="worknode03"

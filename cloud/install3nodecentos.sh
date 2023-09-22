@@ -1,10 +1,11 @@
-#wget https://repo.almalinux.org/almalinux/8/cloud/x86_64/images/AlmaLinux-8-GenericCloud-8.8-20230524.x86_64.qcow2
-#wget https://cloud-images.ubuntu.com/focal/20230731/focal-server-cloudimg-amd64.img  
+#!/bin/bash
+source ./config
+#wget https://repo.almalinux.org/almalinux/8/cloud/x86_64/images/AlmaLinux-8-GenericCloud-8.8-20230524.x86_64.qcow2 -P /mnt/
 sleep 7
 qemu-img create -b /mnt/focal-server-cloudimg-amd64.img   -f qcow2 -F qcow2 /mnt/focal-server-cloudimg.qcow2 45G
 cloud-localds -v --network-config=network_config_static.cfg /mnt/test1-seed.img cloud_init.cfg
 sleep 10
-virt-install --name patroni \
+virt-install --name ${host1} \
   --virt-type kvm \
   --memory 8112 \
   --vcpus 4 \
@@ -23,7 +24,7 @@ sleep 40
 qemu-img create -b /mnt/focal-server-cloudimg-amd64.img   -f qcow2 -F qcow2 /mnt/focal-server-cloudimg2.qcow2 45G
 cloud-localds -v --network-config=network_config_static2.cfg /mnt/test1-seed.img cloud_init.cfg
 sleep 10
-virt-install --name patroni2 \
+virt-install --name ${host2} \
   --virt-type kvm \
   --memory 8112 \
   --vcpus 4 \
@@ -42,7 +43,7 @@ sleep 40
 qemu-img create -b /mnt/focal-server-cloudimg-amd64.img   -f qcow2 -F qcow2 /mnt/focal-server-cloudimg3.qcow2 45G
 cloud-localds -v --network-config=network_config_static3.cfg /mnt/test1-seed.img cloud_init.cfg
 sleep 10
-virt-install --name patroni3 \
+virt-install --name ${host3} \
   --virt-type kvm \
   --memory 8112 \
   --vcpus 4 \

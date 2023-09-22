@@ -31,17 +31,25 @@
           - 127.0.0.1
           - {{ hostvars['master01'].ansible_host }}
           - {{ hostvars['master02'].ansible_host }}
+          - {{ hostvars['master03'].ansible_host }}
         controlPlaneEndpoint: {{ansible_host}}
         etcd:
           external:
             endpoints:
             - http://{{ hostvars['master01'].ansible_host }}:2379
             - http://{{ hostvars['master02'].ansible_host }}:2379
-            - http://{{ hostvars['worknode01'].ansible_host }}:2379
+            - http://{{ hostvars['master03'].ansible_host }}:2379
         networking:
           podSubnet: 10.244.0.0/16
-#          dnsDomain: "cluster.local"
-#          serviceSubnet: "172.20.0.0/16"
+          dnsDomain: "cluster.local"
+          serviceSubnet: "172.20.0.0/16"
+        ---
+        apiVersion: kubelet.config.k8s.io/v1beta1
+        kind: KubeletConfiguration
+        maxPods: 90
+        evictionHard:
+          memory.available: "1024Mi"
+          nodefs.available: "10%" 
 -
   become: true
   hosts: master01
@@ -53,10 +61,10 @@
 
   - name: Pause for 10 minutes to prepare the master 01
     pause:
-      minutes: 10
+      minutes: 8
 
   - name: Scp Pki Master02
     shell: scp -r /etc/kubernetes/pki master02:/etc/kubernetes/
 
-#  - name: Scp Pki Master03
-#    shell: scp -r /etc/kubernetes/pki master03:/etc/kubernetes/
+  - name: Scp Pki Master03
+    shell: scp -r /etc/kubernetes/pki master03:/etc/kubernetes/

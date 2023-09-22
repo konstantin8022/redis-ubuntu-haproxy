@@ -1,7 +1,7 @@
 ---
 -
   become: true
-  hosts: master01,master02
+  hosts: master01,master02,master03
   become_method: sudo
   become_user: root
   tasks:
@@ -43,13 +43,13 @@
       content: |
         vrrp_instance my-group {
           state BACKUP
-          interface ens33
+          interface ens2
           virtual_router_id 10
           priority {{priority}}
           advert_int 1
           preempt_delay 0
           virtual_ipaddress {
-          192.168.1.180/24
+          192.168.1.250/24
           }
         }
 
@@ -59,4 +59,4 @@
       state: "restarted"
       enabled: "yes"
 
-# kubectl patch svc my-web-service -p '{"spec":{"externalIPs":["192.168.1.180"]}}'
+# kubectl patch svc my-web-service -p '{"spec":{"externalIPs":["192.168.1.250"]}}'

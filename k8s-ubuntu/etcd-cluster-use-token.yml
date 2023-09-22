@@ -1,7 +1,7 @@
 ---
 -
   become: true
-  hosts: master01,master02,worknode01
+  hosts: master01,master02,master03
   become_method: sudo
   become_user: root
   tasks:
@@ -28,7 +28,7 @@
         ETCD_INITIAL_CLUSTER_STATE="new"
         ETCD_INITIAL_CLUSTER_TOKEN="etcd-token-1"
         ETCD_ADVERTISE_CLIENT_URLS="http://{{ansible_host}}:2379"
-        ETCD_INITIAL_CLUSTER="{{ hostvars['master01'].inventory_hostname }}=http://{{ hostvars['master01'].ansible_host }}:2380,{{ hostvars['master02'].inventory_hostname }}=http://{{ hostvars['master02'].ansible_host }}:2380,{{ hostvars['worknode01'].inventory_hostname }}=http://{{ hostvars['worknode01'].ansible_host }}:2380"
+        ETCD_INITIAL_CLUSTER="{{ hostvars['master01'].inventory_hostname }}=http://{{ hostvars['master01'].ansible_host }}:2380,{{ hostvars['master02'].inventory_hostname }}=http://{{ hostvars['master02'].ansible_host }}:2380,{{ hostvars['master03'].inventory_hostname }}=http://{{ hostvars['master03'].ansible_host }}:2380"
 
   - name: Start etcd
     service:
@@ -59,3 +59,29 @@
       name: "etcd"
       state: "restarted"
       enabled: "yes"
+
+  - name: test etcd
+    copy:
+      dest: /root/.profile 
+      content: |
+        export ETCDCTL_API="3"
+        export PATRONI_ETCD_URL="http://127.0.0.1:2379"
+        k8s1=192.168.1.183
+        k8s2=192.168.1.243
+        k8s3=192.168.1.244
+        ENDPOINTS=$k8s1:2379,$k8s2:2379,$k8s3:2379
+        if [ "$BASH" ]; then
+          if [ -f ~/.bashrc ]; then
+              . ~/.bashrc
+          fi
+        fi
+        mesg n 2> /dev/null || true
+
+  #- name: source
+  #  shell: /bin/bash source /root/.profile
+
+  #- name: health status
+  #  shell: etcdctl endpoint status --write-out=table --endpoints=$ENDPOINTS
+
+
+    
